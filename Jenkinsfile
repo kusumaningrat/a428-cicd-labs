@@ -58,3 +58,4 @@ node {
             sh './jenkins/scripts/kill.sh'
         }
     }
+}
