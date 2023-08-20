@@ -51,10 +51,10 @@ pipeline {
             }
             steps {
                 echo 'Running Deploy stage'
-                sshagent (credentials: ['devauth']) {
+                sshagent(credentials: ['devauth']) {
                     sh """
                     ssh -tt -o StrictHostKeyChecking=no ubuntu@13.212.247.57 bash -c '
-                        npm --version
+                        whoami
                     '
                     """
                 }
