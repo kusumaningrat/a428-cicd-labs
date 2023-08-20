@@ -25,7 +25,7 @@ pipeline {
                 sh './jenkins/scripts/deliver.sh'
                 script {
                     def userInput = input(
-                        message: 'Finished using the website? (Click "Proceed" to continue)',
+                        message: '? (Lanjutkan ke tahap Deploy ?"Proceed" to continue)',
                         parameters: [
                             [$class: 'ChoiceParameterDefinition', 
                              choices: 'Proceed\nAbort', 
