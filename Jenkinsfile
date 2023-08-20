@@ -61,7 +61,7 @@ pipeline {
                     }
                     // sh './jenkins/scripts/deliver.sh'
                     // sleep(time: 60, unit: 'SECONDS')
-                    // sh './jenkins/scripts/kill.sh'
+                }    // sh './jenkins/scripts/kill.sh'
             }
         }
     }
