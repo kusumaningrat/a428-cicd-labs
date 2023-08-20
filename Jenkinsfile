@@ -51,17 +51,18 @@ pipeline {
             }
             steps {
                 script {
-                    sshagent (credentials: ['devauth']) {
-                        sh """
-                        ssh -tt -o StrictHostKeyChecking=no ubuntu@3.1.195.136 bash -c '
-                            pwd
-                            whoami
-                        '
-                        """
-                    }
-                    // sh './jenkins/scripts/deliver.sh'
-                    // sleep(time: 60, unit: 'SECONDS')
-                }    // sh './jenkins/scripts/kill.sh'
+                    def remoteCommand = "ls -l /home"
+
+                    sshCommand remote:[
+                        host: 13.212.247.57,
+                        user: ubuntu,
+                        port: 22,
+                        key: credentials('devauth')
+                    ], command: remoteCommand, failOnError: true
+                }
+                // sh './jenkins/scripts/deliver.sh'
+                // sleep(time: 60, unit: 'SECONDS')
+                // sh './jenkins/scripts/kill.sh'
             }
         }
     }
