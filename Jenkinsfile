@@ -50,7 +50,6 @@ pipeline {
                 expression { return env.DEPLOY_APPROVED }
             }
             steps {
-                echo 'Running Deploy stage'
                 sshagent(credentials: ['devauth']) {
                     sh """
                     ssh -tt -o StrictHostKeyChecking=no ubuntu@13.212.247.57 bash -c '
