@@ -23,24 +23,10 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh './jenkins/scripts/deliver.sh'
+                input message: 'Finished using the website? (Click "Proceed" to continue)'
                 script {
-                    def userInput = input(
-                        message: 'Lanjutkan ke tahap Deploy ? "Proceed" to continue',
-                        parameters: [
-                            [$class: 'ChoiceParameterDefinition', 
-                             choices: 'Proceed\nAbort', 
-                             description: 'Select an option',
-                             name: 'ACTION']
-                        ]
-                    )
-                    
-                    if (userInput == 'Proceed') {
-                        echo 'Continuing with the pipeline'
-                    } else {
-                        echo 'Aborting the pipeline'
-                        currentBuild.result = 'ABORTED'
-                        error('Pipeline aborted by user')
-                    }
+                    echo 'Waiting for 1 minute...'
+                    sleep(time: 60, unit: 'SECONDS') // Menunggu selama 1 menit
                 }
                 sh './jenkins/scripts/kill.sh'
             }
