@@ -51,18 +51,14 @@ pipeline {
             }
             steps {
                 script {
-                    def remoteCommand = "ls -l /home/"
-                    def sshKey = readFile('/home/devops/privkey.pem') 
+                    def remoteCommand = "ls -l /home"
 
-                    def sshCommand = "ssh -i ${sshKey} ubuntu@13.212.247.57 '${remoteCommand}'"
-                    
-                    def sshResult = sh(script: sshCommand, returnStatus: true)
-                    
-                    if (sshResult == 0) {
-                        echo "SSH command executed successfully"
-                    } else {
-                        error "SSH command failed with exit code ${sshResult}"
-                    }
+                    sshCommand remote: [
+                        host: 13.212.247.57,
+                        user: ubuntu,
+                        port: 22,
+                        key: credentials('devauth')
+                    ], command: remoteCommand, failOnError: true
                 }
                 // sh './jenkins/scripts/deliver.sh'
                 // sleep(time: 60, unit: 'SECONDS')
