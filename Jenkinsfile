@@ -50,16 +50,23 @@ pipeline {
                 expression { return env.DEPLOY_APPROVED }
             }
             steps {
-                sshagent(credentials: ['devauth']) {
-                    sh """
-                    ssh -tt -o StrictHostKeyChecking=no ubuntu@13.212.247.57 bash -c '
-                        whoami
-                    '
-                    """
+                script {
+                    def remoteCommand = "ls -l /home/"
+                    def sshKey = readFile('/home/devops/privkey.pem') 
+
+                    def sshCommand = "ssh -i ${sshKey} ubuntu@13.212.247.57 '${remoteCommand}'"
+                    
+                    def sshResult = sh(script: sshCommand, returnStatus: true)
+                    
+                    if (sshResult == 0) {
+                        echo "SSH command executed successfully"
+                    } else {
+                        error "SSH command failed with exit code ${sshResult}"
+                    }
                 }
                 // sh './jenkins/scripts/deliver.sh'
-                sleep(time: 60, unit: 'SECONDS')
-                sh './jenkins/scripts/kill.sh'
+                // sleep(time: 60, unit: 'SECONDS')
+                // sh './jenkins/scripts/kill.sh'
             }
         }
     }
