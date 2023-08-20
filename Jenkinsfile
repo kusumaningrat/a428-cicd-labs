@@ -1,4 +1,3 @@
-// Declarative Pipeline
 pipeline {
     agent {
         docker {
@@ -8,6 +7,7 @@ pipeline {
     }
     environment {
         CI = 'true'
+        DEPLOY_APPROVED = 'false' // Shared environment variable
     }
     stages {
         stage('Build') {
@@ -21,38 +21,48 @@ pipeline {
             }
         }
         stage('Manual Approval') {
-            script {
-                def userInput = input(
-                    message: 'Lanjutkan ke tahap deploy? (Click "Proceed" to continue)',
-                    parameters: [
-                        [$class: 'ChoiceParameterDefinition', 
-                            choices: 'Proceed\nAbort', 
-                            description: 'Select an option',
-                            name: 'ACTION']
-                    ]
-                )
-                
-                if (userInput == 'Proceed') {
-                    echo 'Continuing to Deploy stage'
-                    DEPLOY_APPROVED = 'true'
-                    sleep(time: 60, unit: 'SECONDS')
-                } else {
-                    echo 'Aborting the pipeline'
-                    currentBuild.result = 'ABORTED'
-                    error('Pipeline aborted by user')
+            steps {
+                script {
+                    def userInput = input(
+                        message: 'Lanjutkan ke tahap deploy? (Click "Proceed" to continue)',
+                        parameters: [
+                            [$class: 'ChoiceParameterDefinition', 
+                             choices: 'Proceed\nAbort', 
+                             description: 'Select an option',
+                             name: 'ACTION']
+                        ]
+                    )
+                    
+                    if (userInput == 'Proceed') {
+                        echo 'Continuing to Deploy stage'
+                        DEPLOY_APPROVED = 'true' // Set the environment variable
+                    } else {
+                        echo 'Aborting the pipeline'
+                        currentBuild.result = 'ABORTED'
+                        error('Pipeline aborted by user')
+                    }
+                    echo "DEPLOY_APPROVED: ${DEPLOY_APPROVED}"
                 }
             }
         }
         stage('Deploy') {
             when {
-                expression { return env.DEPLOY_APPROVED == 'true' }
+                expression { return env.DEPLOY_APPROVED }
             }
             steps {
                 echo 'Running Deploy stage'
-                sh './jenkins/scripts/deliver.sh'
+                sshagent (credentials: ['devauth']) {
+                    sh """
+                    ssh -tt -o StrictHostKeyChecking=no ubuntu@13.212.247.57 bash -c '
+                        npm --version
+                    '
+                    """
+                }
+                // sh './jenkins/scripts/deliver.sh'
                 sleep(time: 60, unit: 'SECONDS')
                 sh './jenkins/scripts/kill.sh'
             }
         }
     }
 }
+s
