@@ -23,43 +23,28 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh './jenkins/scripts/deliver.sh'
-                input message: 'Finished using the website? (Click "Proceed" to continue)'
                 script {
-                    echo 'Waiting for 1 minute...'
-                    sleep(time: 60, unit: 'SECONDS') // Menunggu selama 1 menit
+                    def userInput = input(
+                        message: 'Finished using the website? (Click "Proceed" to continue)',
+                        parameters: [
+                            [$class: 'ChoiceParameterDefinition', 
+                             choices: 'Proceed\nAbort', 
+                             description: 'Select an option',
+                             name: 'ACTION']
+                        ]
+                    )
+                    
+                    if (userInput == 'Proceed') {
+                        echo 'Live demo'
+                        sleep(time: 60, unit: 'SECONDS')
+                    } else {
+                        echo 'Aborting the pipeline'
+                        currentBuild.result = 'ABORTED'
+                        error('Pipeline aborted by user')
+                    }
                 }
                 sh './jenkins/scripts/kill.sh'
             }
         }
     }
 }
-
-// // Scripted Pipeline
-// node {
-//     def nodeImage = 'node:14-alpine'
-//     def npmCache = "${JENKINS_HOME}/.npm-cache"
-
-//     stage('Checkout') {
-//         checkout scm
-//     }
-
-//     stage('Setup') {
-//         docker.image(nodeImage).inside("-v ${npmCache}:/root/.npm") {
-//             sh 'npm install'
-//         }
-//     }
-
-//     stage('Test') {
-//         docker.image(nodeImage).inside("-v ${npmCache}:/root/.npm") {
-//             sh './jenkins/scripts/test.sh'
-//         }
-//     }
-
-//     stage('Deliver') {
-//         docker.image(nodeImage).inside("-v ${npmCache}:/root/.npm") {
-//             sh './jenkins/scripts/deliver.sh'
-//             input message: 'Finished using the website? (Click "Proceed" to continue)'
-//             sh './jenkins/scripts/kill.sh'
-//         }
-//     }
-// }
