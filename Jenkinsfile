@@ -50,11 +50,12 @@ pipeline {
                     sh """
                         ssh -tt -o StrictHostKeyChecking=no ubuntu@3.1.195.136 bash -c '
                         cd /home/ubuntu 
-                        chmod +x deploy
-                        ./deploy
+                        chmod +x deploy.sh
+                        ./deploy.sh
                     '
                     """
                 }
+                sleep(time: 60, unit: 'SECONDS')
                 script {
                     sh './jenkins/scripts/kill.sh'
                 }
