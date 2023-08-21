@@ -55,9 +55,6 @@ pipeline {
                     '
                     """
                 }
-                script {
-                    sh './jenkins/scripts/kill.sh'
-                }
             }
         }
     }
