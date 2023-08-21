@@ -48,7 +48,6 @@ pipeline {
             steps {
                 script {
                     sh 'npm run build'
-                    sh 'npm run start'
                 }
                 sshagent(credentials: ['devauth']) {
                     sh """
