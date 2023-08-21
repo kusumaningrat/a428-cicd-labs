@@ -1,10 +1,6 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:16-alpine'
-            args '-p 3000:3000'
-        }
-    }
+    agent any
+    tools { nodejs "nodejs" }
     environment {
         CI = 'true'
         DEPLOY_APPROVED = 'false' // Shared environment variable
@@ -50,19 +46,18 @@ pipeline {
                 expression { return env.DEPLOY_APPROVED }
             }
             steps {
-                script {
-                    def remoteCommand = "ls -l /home"
-
-                    sshCommand remote:[
-                        host: 13.212.247.57,
-                        user: ubuntu,
-                        port: 22,
-                        key: credentials('devauth')
-                    ], command: remoteCommand, failOnError: true
+                sshagent(credentials: ['devauth']) {
+                    sh """
+                        ssh -tt -o StrictHostKeyChecking=no ubuntu@3.1.195.136 bash -c '
+                        cd /home/ubuntu 
+                        chmod +x deploy
+                        ./deploy
+                    '
+                    """
                 }
-                // sh './jenkins/scripts/deliver.sh'
-                // sleep(time: 60, unit: 'SECONDS')
-                // sh './jenkins/scripts/kill.sh'
+                // script {                    
+                sleep(time: 60, unit: 'SECONDS')
+                sh './jenkins/scripts/kill.sh'
             }
         }
     }
