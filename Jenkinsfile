@@ -46,15 +46,16 @@ pipeline {
                 expression { return env.DEPLOY_APPROVED }
             }
             steps {
+                script {
+                    sh 'npm run build'
+                    sh 'npm run start'
+                }
                 sshagent(credentials: ['devauth']) {
                     sh """
-                        ssh -tt -o StrictHostKeyChecking=no ubuntu@3.1.195.136 bash -c '
-                        cd /home/ubuntu 
-                        chmod +x deploy.sh
-                        ./deploy.sh
-                    '
+                        scp -r build ubuntu@3.1.195.136:/var/www
                     """
                 }
+                sleep(time: 60, unit: 'SECONDS')
             }
         }
     }
