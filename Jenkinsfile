@@ -55,9 +55,9 @@ pipeline {
                     '
                     """
                 }
-                // script {                    
-                sleep(time: 60, unit: 'SECONDS')
-                sh './jenkins/scripts/kill.sh'
+                script {
+                    sh './jenkins/scripts/kill.sh'
+                }
             }
         }
     }
