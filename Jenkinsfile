@@ -51,7 +51,11 @@ pipeline {
                 }
                 sshagent(credentials: ['devauth']) {
                     sh """
-                        scp -r build ubuntu@3.1.195.136:/var/www
+                        scp -r build ubuntu@3.1.195.136:/home/ubuntu
+                    """
+                    sh """
+                        ssh -tt -o StrictHostKeyChecking=no ubuntu@3.1.195.136 bash -c
+                        './deploy.sh'
                     """
                 }
                 sleep(time: 60, unit: 'SECONDS')
